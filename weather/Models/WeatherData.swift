@@ -16,9 +16,9 @@ struct WeatherData: Decodable {
 struct Main: Decodable {
     let temp: Double
     let humidity: Int
-    let feels_like:Int
-    let temp_min:Int
-    let temp_max:Int
+    let feels_like:Double
+    let temp_min:Double
+    let temp_max:Double
 }
 
 struct Wind: Decodable {

@@ -12,13 +12,14 @@ protocol WeatherViewModelDelegate: AnyObject {
     func weatherViewModelDidFailWithError(_ weatherViewModel: WeatherViewModel, error: Error)
 }
 
+let lastSearchCityKey = "lastSearchCity"
+
 class WeatherViewModel {
     
     weak var delegate: WeatherViewModelDelegate?
     
     private let weatherService: WeatherServiceProtocol
     private let userDefaults = UserDefaults.standard
-    private let lastSearchCityKey = "lastSearchCity"
     
     var city: String = "" {
         didSet {
@@ -32,8 +33,17 @@ class WeatherViewModel {
         self.weatherService = weatherService
     }
     
-    private func loadWeatherData() {
-        weatherService.getWeatherData(forCity: city) { [weak self] result in
+    func loadWeatherData() {
+        let allowedCharacterSet = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
+        let encodedCity:String
+        if isStringEncoded(city) {
+            encodedCity = city
+        }
+        else {
+            encodedCity = city.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet) ?? city
+        }
+        
+        weatherService.getWeatherData(forCity: encodedCity) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let weatherData):
@@ -45,11 +55,28 @@ class WeatherViewModel {
         }
     }
     
-    func getLastSearchCity() -> String? {
-        return userDefaults.string(forKey: lastSearchCityKey)
+    func loadLastSearchCity() {
+        if let lastSearchCity = getLastSearchCity() {
+            self.city = decodeString(lastSearchCity) ?? ""
+        }
     }
     
-    private func saveLastSearchCity(_ city: String) {
-        userDefaults.set(city, forKey: lastSearchCityKey)
+    private func isStringEncoded(_ string:String)->Bool {
+        if let decodedString = string.removingPercentEncoding {
+            if decodedString == string {
+                return false
+            } else {
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func decodeString(_ encodedString: String) -> String? {
+        return encodedString.removingPercentEncoding
+    }
+    
+    private func getLastSearchCity() -> String? {
+        return userDefaults.string(forKey: lastSearchCityKey)
     }
 }

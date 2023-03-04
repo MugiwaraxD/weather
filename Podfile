@@ -6,6 +6,7 @@ target 'weather' do
   use_frameworks!
 
   # Pods for weather
+  pod 'SDWebImage', '~> 5.0'
 
   target 'weatherTests' do
     inherit! :search_paths

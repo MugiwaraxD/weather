@@ -12,13 +12,6 @@ class WeatherViewController: UIViewController {
     
     private var viewModel: WeatherViewModel?
     
-    private let cityTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Enter city name"
-        textField.borderStyle = .roundedRect
-        return textField
-    }()
-    
     private let temperatureLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
@@ -67,6 +60,20 @@ class WeatherViewController: UIViewController {
         return imageView
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 18)
+        label.text = "Error"
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.isHidden = true
+        return label
+    }()
+   
+    private let searchController = UISearchController(searchResultsController: nil)
+
+    private let searchBarPlaceHolder = "Enter city name"
+    
     init(viewModel: WeatherViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -79,27 +86,54 @@ class WeatherViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        viewModel?.delegate = self
+        viewModel?.loadLastSearchCity()
+        
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = searchBarPlaceHolder
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+        searchController.searchBar.delegate = self
     }
     
     private func setupUI(){
         view.backgroundColor = .white
         
-        let stackView = UIStackView(arrangedSubviews: [cityTextField, temperatureLabel, humidityLabel, feelsLikeLabel, tempMinLabel, tempMaxLabel,  windLabel, descriptionLabel, weatherImageView])
+        // DATA LABELS
+        let stackView = UIStackView(arrangedSubviews: [ temperatureLabel, humidityLabel, feelsLikeLabel, tempMinLabel, tempMaxLabel,  windLabel, descriptionLabel, weatherImageView])
         stackView.axis = .vertical
         stackView.spacing = 8
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
-        
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16)
         ])
+        
+        // ERROR LABEL
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(errorLabel)
+        NSLayoutConstraint.activate([
+            errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
     }
     
     private func updateUI(with weatherData: WeatherData) {
-        temperatureLabel.text = "\(Int(weatherData.main.temp - 273.15))°C"
+        errorLabel.isHidden = true
+        
+        if let city = viewModel?.city {
+            self.searchController.searchBar.placeholder = city
+        }
+        temperatureLabel.text = "Current Temp: \(Int(weatherData.main.temp))°F"
         humidityLabel.text = "Humidity: \(weatherData.main.humidity)%"
+        feelsLikeLabel.text = "Feels Like: \(Int(weatherData.main.feels_like))°F"
+        tempMinLabel.text = "Min Temp: \(Int(weatherData.main.temp_min))°F"
+        tempMaxLabel.text = "Max Temp: \(Int(weatherData.main.temp_max))°F"
         windLabel.text = "Wind: \(weatherData.wind.speed) m/s"
         descriptionLabel.text = weatherData.weather.first?.description ?? ""
         if let iconCode = weatherData.weather.first?.icon {
@@ -110,17 +144,23 @@ class WeatherViewController: UIViewController {
         }
     }
     
-    private func hideUI() {
+    private func hideDataUI() {
         temperatureLabel.isHidden = true
         humidityLabel.isHidden = true
+        feelsLikeLabel.isHidden = true
+        tempMinLabel.isHidden = true
+        tempMaxLabel.isHidden = true
         windLabel.isHidden = true
         descriptionLabel.isHidden = true
         weatherImageView.isHidden = true
     }
     
-    private func showUI() {
+    private func showDataUI() {
         temperatureLabel.isHidden = false
         humidityLabel.isHidden = false
+        feelsLikeLabel.isHidden = false
+        tempMinLabel.isHidden = false
+        tempMaxLabel.isHidden = false
         windLabel.isHidden = false
         descriptionLabel.isHidden = false
         weatherImageView.isHidden = false
@@ -131,26 +171,26 @@ extension WeatherViewController: WeatherViewModelDelegate {
     func weatherViewModelDidUpdateData(_ weatherViewModel: WeatherViewModel) {
         if let weatherData = viewModel?.weatherData {
             updateUI(with: weatherData)
-            showUI()
+            
+            showDataUI()
         }
     }
     
     func weatherViewModelDidFailWithError(_ weatherViewModel: WeatherViewModel, error: Error) {
-        hideUI()
-                let errorLabel = UILabel()
-                errorLabel.font = UIFont.systemFont(ofSize: 18)
-                errorLabel.text = "Error retrieving weather data: \(error.localizedDescription)"
-                errorLabel.numberOfLines = 0
-                errorLabel.textAlignment = .center
-                errorLabel.translatesAutoresizingMaskIntoConstraints = false
-                view.addSubview(errorLabel)
-                
-                NSLayoutConstraint.activate([
-                    errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-                    errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-                    errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-                ])
+        hideDataUI()
+        searchController.searchBar.placeholder = searchBarPlaceHolder
+
+        errorLabel.text = "Error retrieving weather data: \(error.localizedDescription)"
+        errorLabel.isHidden = false
     }
-    
-    
+}
+
+extension WeatherViewController:UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let unencodedCity = searchController.searchBar.text, !unencodedCity.isEmpty {
+            viewModel?.city = unencodedCity
+            viewModel?.loadWeatherData()
+            hideDataUI()
+        }
+    }
 }
