@@ -12,9 +12,15 @@ class WeatherViewController: UIViewController {
     
     private var viewModel: WeatherViewModel?
     
-    private let temperatureLabel: UILabel = {
+    private let cityNameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
+        return label
+    }()
+    
+    private let temperatureLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 18)
         return label
     }()
     
@@ -101,7 +107,7 @@ class WeatherViewController: UIViewController {
         view.backgroundColor = .white
         
         // DATA LABELS
-        let stackView = UIStackView(arrangedSubviews: [ temperatureLabel, humidityLabel, feelsLikeLabel, tempMinLabel, tempMaxLabel,  windLabel, descriptionLabel, weatherImageView])
+        let stackView = UIStackView(arrangedSubviews: [ cityNameLabel, temperatureLabel, humidityLabel, feelsLikeLabel, tempMinLabel, tempMaxLabel,  windLabel, descriptionLabel, weatherImageView])
         stackView.axis = .vertical
         stackView.spacing = 8
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -120,15 +126,12 @@ class WeatherViewController: UIViewController {
             errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-        
     }
     
     private func updateUI(with weatherData: WeatherData) {
         errorLabel.isHidden = true
         
-        if let city = viewModel?.city {
-            self.searchController.searchBar.placeholder = city
-        }
+        cityNameLabel.text = "Current City: \(weatherData.name)"
         temperatureLabel.text = "Current Temp: \(Int(weatherData.main.temp))°F"
         humidityLabel.text = "Humidity: \(weatherData.main.humidity)%"
         feelsLikeLabel.text = "Feels Like: \(Int(weatherData.main.feels_like))°F"
@@ -145,6 +148,7 @@ class WeatherViewController: UIViewController {
     }
     
     private func hideDataUI() {
+        cityNameLabel.isHidden = true
         temperatureLabel.isHidden = true
         humidityLabel.isHidden = true
         feelsLikeLabel.isHidden = true
@@ -156,6 +160,7 @@ class WeatherViewController: UIViewController {
     }
     
     private func showDataUI() {
+        cityNameLabel.isHidden = false
         temperatureLabel.isHidden = false
         humidityLabel.isHidden = false
         feelsLikeLabel.isHidden = false
@@ -178,8 +183,6 @@ extension WeatherViewController: WeatherViewModelDelegate {
     
     func weatherViewModelDidFailWithError(_ weatherViewModel: WeatherViewModel, error: Error) {
         hideDataUI()
-        searchController.searchBar.placeholder = searchBarPlaceHolder
-
         errorLabel.text = "Error retrieving weather data: \(error.localizedDescription)"
         errorLabel.isHidden = false
     }

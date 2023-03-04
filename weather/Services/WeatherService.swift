@@ -16,13 +16,14 @@ class WeatherService: WeatherServiceProtocol {
     private let userDefaults = UserDefaults.standard
     
     func getWeatherData(forCity city: String, completion: @escaping (Result<WeatherData, Error>) -> Void) {
+        
+        // reads key from config; however, best solution is to read from backend and not keep keys on client
         guard let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String  else {
             print("Unable to read key")
             return completion(.failure(WeatherServiceError.invalidURL))
         }
         let BASE_URL = "https://api.openweathermap.org/data/2.5/weather?q="
         let urlString = "\(BASE_URL)\(city)&units=imperial&appid=\(apiKey)"
-        
         if let url = URL(string: urlString) {
             let session = URLSession.shared
             let task = session.dataTask(with: url, completionHandler: { data, response, error in
