@@ -75,9 +75,9 @@ class WeatherViewController: UIViewController {
         label.isHidden = true
         return label
     }()
-   
+    
     private let searchController = UISearchController(searchResultsController: nil)
-
+    
     private let searchBarPlaceHolder = "Enter city name"
     
     init(viewModel: WeatherViewModel) {
@@ -99,8 +99,9 @@ class WeatherViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = searchBarPlaceHolder
         navigationItem.searchController = searchController
-        definesPresentationContext = true
         searchController.searchBar.delegate = self
+        
+        definesPresentationContext = true
     }
     
     private func setupUI(){
@@ -182,9 +183,10 @@ extension WeatherViewController: WeatherViewModelDelegate {
     }
     
     func weatherViewModelDidFailWithError(_ weatherViewModel: WeatherViewModel, error: Error) {
-        hideDataUI()
         errorLabel.text = "Error retrieving weather data: \(error.localizedDescription)"
         errorLabel.isHidden = false
+        
+        hideDataUI()
     }
 }
 
