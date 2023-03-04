@@ -52,6 +52,7 @@ class WeatherViewModel {
     }
     
     private func loadWeatherData(forCity city: String) {
+        // encode city name if needed. e.g. handle cases like San Francisco vs San%20Fracisco
         let allowedCharacterSet = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
         let encodedCity: String
         if isStringEncoded(city) {
