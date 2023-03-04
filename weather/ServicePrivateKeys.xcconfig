@@ -1,0 +1,10 @@
+//
+//  ServicePrivateKeys.xcconfig
+//  weather
+//
+//  Created by Jason Zheng on 3/3/23.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+API_KEY = 725e296ea6d45836d8ade811352dcbe0

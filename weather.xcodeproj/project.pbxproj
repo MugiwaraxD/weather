@@ -59,6 +59,7 @@
 		88895D5129B2C9B700C3EF11 /* WeatherData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherData.swift; sourceTree = "<group>"; };
 		88895D5329B2C9CE00C3EF11 /* WeatherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherViewModel.swift; sourceTree = "<group>"; };
 		88895D5629B2CD4300C3EF11 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		88895D5B29B30C5200C3EF11 /* ServicePrivateKeys.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ServicePrivateKeys.xcconfig; sourceTree = "<group>"; };
 		973C4695B36327D6655A2A21 /* Pods-weather-weatherUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-weather-weatherUITests.debug.xcconfig"; path = "Target Support Files/Pods-weather-weatherUITests/Pods-weather-weatherUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		B47DAE40CEBFDF4C46976927 /* Pods-weather.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-weather.debug.xcconfig"; path = "Target Support Files/Pods-weather/Pods-weather.debug.xcconfig"; sourceTree = "<group>"; };
 		CCBEC1209474F9D2ECAB49BF /* Pods_weather.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_weather.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -152,6 +153,7 @@
 				88895D2729B2C58200C3EF11 /* Assets.xcassets */,
 				88895D2929B2C58200C3EF11 /* LaunchScreen.storyboard */,
 				88895D2C29B2C58200C3EF11 /* Info.plist */,
+				88895D5B29B30C5200C3EF11 /* ServicePrivateKeys.xcconfig */,
 			);
 			path = weather;
 			sourceTree = "<group>";
@@ -498,6 +500,7 @@
 /* Begin XCBuildConfiguration section */
 		88895D4329B2C58200C3EF11 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 88895D5B29B30C5200C3EF11 /* ServicePrivateKeys.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -612,7 +615,7 @@
 		};
 		88895D4629B2C58200C3EF11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B47DAE40CEBFDF4C46976927 /* Pods-weather.debug.xcconfig */;
+			baseConfigurationReference = 973C4695B36327D6655A2A21 /* Pods-weather-weatherUITests.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

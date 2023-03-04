@@ -16,9 +16,13 @@ class WeatherService: WeatherServiceProtocol {
     private let userDefaults = UserDefaults.standard
     
     func getWeatherData(forCity city: String, completion: @escaping (Result<WeatherData, Error>) -> Void) {
-        let API_KEY = "725e296ea6d45836d8ade811352dcbe0"
+        guard let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String  else {
+            print("Unable to read key")
+            return completion(.failure(WeatherServiceError.invalidURL))
+        }
         let BASE_URL = "https://api.openweathermap.org/data/2.5/weather?q="
-        let urlString = "\(BASE_URL)\(city)&units=imperial&appid=\(API_KEY)"
+        let urlString = "\(BASE_URL)\(city)&units=imperial&appid=\(apiKey)"
+        
         if let url = URL(string: urlString) {
             let session = URLSession.shared
             let task = session.dataTask(with: url, completionHandler: { data, response, error in
@@ -55,4 +59,5 @@ class WeatherService: WeatherServiceProtocol {
 enum WeatherServiceError: Error {
     case unknownError
     case invalidURL
+    case invalidKeyRead
 }
