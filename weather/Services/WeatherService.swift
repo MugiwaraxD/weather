@@ -54,7 +54,7 @@ class WeatherService: WeatherServiceProtocol {
                     do {
                         let decoder = JSONDecoder()
                         let weatherData = try decoder.decode(WeatherData.self, from: data!)
-                        weakSelf.saveLastSearchCity(weatherData.name)
+                        weakSelf.saveLastSearchCityOnSuccess(weatherData.name)
                         completion(.success(weatherData))
                     } catch {
                         print("Error decoding weather data: \(error.localizedDescription)")
@@ -69,7 +69,7 @@ class WeatherService: WeatherServiceProtocol {
         }
     }
     
-    private func saveLastSearchCity(_ city: String) {
+    private func saveLastSearchCityOnSuccess(_ city: String) {
         userDefaults.set(city, forKey: lastSearchCityKey)
     }
 }

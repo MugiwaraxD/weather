@@ -12,6 +12,7 @@ protocol LocationManagerDelegate: AnyObject {
     func locationFailedToUpdate(error: Error)
 }
 
+// NSObject because wrapper around CLLocationManager
 class LocationManager: NSObject {
     
     weak var delegate: LocationManagerDelegate?
