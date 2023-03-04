@@ -45,6 +45,12 @@ class WeatherViewModel {
         locationManager.requestLocationAccess()
     }
     
+    func loadLastSearchCity() {
+        if let lastSearchCity = getLastSearchCity() {
+            self.city = decodeString(lastSearchCity) ?? ""
+        }
+    }
+    
     private func loadWeatherData(forCity city: String) {
         let allowedCharacterSet = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
         let encodedCity: String
@@ -77,12 +83,6 @@ class WeatherViewModel {
             case .failure(let error):
                 self.delegate?.weatherViewModelDidFailWithError(self, error: error)
             }
-        }
-    }
-    
-    func loadLastSearchCity() {
-        if let lastSearchCity = getLastSearchCity() {
-            self.city = decodeString(lastSearchCity) ?? ""
         }
     }
     

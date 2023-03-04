@@ -129,7 +129,7 @@ class WeatherViewController: UIViewController {
         ])
     }
     
-    private func updateUI(with weatherData: WeatherData) {
+    private func updateDataLabels(with weatherData: WeatherData) {
         errorLabel.isHidden = true
         
         cityNameLabel.text = "Current City: \(weatherData.name)"
@@ -176,7 +176,7 @@ class WeatherViewController: UIViewController {
 extension WeatherViewController: WeatherViewModelDelegate {
     func weatherViewModelDidUpdateData(_ weatherViewModel: WeatherViewModel) {
         if let weatherData = viewModel?.weatherData {
-            updateUI(with: weatherData)
+            updateDataLabels(with: weatherData)
             
             showDataUI()
         }

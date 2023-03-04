@@ -17,6 +17,7 @@ class WeatherService: WeatherServiceProtocol {
     
     private let userDefaults = UserDefaults.standard
     
+    // TODO: UPDATE TO GET API KEY FROM SERVER IN FUTURE
     func getWeatherData(forCity city: String, completion: @escaping (Result<WeatherData, Error>) -> Void) {
         guard let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String  else {
             print("Unable to read key")
