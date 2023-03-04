@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import CoreLocation
 
 protocol WeatherServiceProtocol {
     func getWeatherData(forCity city: String, completion: @escaping (Result<WeatherData, Error>) -> Void)
+    func getWeatherData(forCoordinate coordinate: CLLocationCoordinate2D, completion: @escaping (Result<WeatherData, Error>) -> Void)
 }
 
 class WeatherService: WeatherServiceProtocol {
@@ -16,18 +18,33 @@ class WeatherService: WeatherServiceProtocol {
     private let userDefaults = UserDefaults.standard
     
     func getWeatherData(forCity city: String, completion: @escaping (Result<WeatherData, Error>) -> Void) {
-        
-        // reads key from config; however, best solution is to read from backend and not keep keys on client
         guard let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String  else {
             print("Unable to read key")
             return completion(.failure(WeatherServiceError.invalidURL))
         }
         let BASE_URL = "https://api.openweathermap.org/data/2.5/weather?q="
         let urlString = "\(BASE_URL)\(city)&units=imperial&appid=\(apiKey)"
+        fetchWeatherData(withURLString: urlString, completion: completion)
+    }
+    
+    func getWeatherData(forCoordinate coordinate: CLLocationCoordinate2D, completion: @escaping (Result<WeatherData, Error>) -> Void) {
+        guard let apiKey = Bundle.main.infoDictionary?["API_KEY"] as? String else {
+            print("Unable to read key")
+            return completion(.failure(WeatherServiceError.invalidURL))
+        }
+        let BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
+        let lat = String(format: "%.2f", coordinate.latitude)
+        let lon = String(format: "%.2f", coordinate.longitude)
+        let urlString = "\(BASE_URL)lat=\(lat)&lon=\(lon)&units=imperial&appid=\(apiKey)"
+        fetchWeatherData(withURLString: urlString, completion: completion)
+    }
+    
+    private func fetchWeatherData(withURLString urlString: String, completion: @escaping (Result<WeatherData, Error>) -> Void) {
         if let url = URL(string: urlString) {
             let session = URLSession.shared
             let task = session.dataTask(with: url, completionHandler: { data, response, error in
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let weakSelf = self else { return }
                     if error != nil || data == nil {
                         print("Error retrieving weather data: \(error?.localizedDescription ?? "unknown error")")
                         completion(.failure(error ?? WeatherServiceError.unknownError))
@@ -36,14 +53,13 @@ class WeatherService: WeatherServiceProtocol {
                     do {
                         let decoder = JSONDecoder()
                         let weatherData = try decoder.decode(WeatherData.self, from: data!)
-                        self.saveLastSearchCity(city)
+                        weakSelf.saveLastSearchCity(weatherData.name)
                         completion(.success(weatherData))
                     } catch {
                         print("Error decoding weather data: \(error.localizedDescription)")
                         completion(.failure(error))
                     }
                 }
-                
             })
             task.resume()
         } else {

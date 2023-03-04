@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 protocol WeatherViewModelDelegate: AnyObject {
     func weatherViewModelDidUpdateData(_ weatherViewModel: WeatherViewModel)
@@ -20,10 +21,19 @@ class WeatherViewModel {
     
     private let weatherService: WeatherServiceProtocol
     private let userDefaults = UserDefaults.standard
+    private let locationManager = LocationManager()
     
     var city: String = "" {
         didSet {
-            loadWeatherData()
+            loadWeatherData(forCity: city)
+        }
+    }
+    
+    var currentLocation: CLLocation? {
+        didSet {
+            if let location = currentLocation {
+                loadWeatherData(forCoordinate: location.coordinate)
+            }
         }
     }
     
@@ -31,11 +41,13 @@ class WeatherViewModel {
     
     init(weatherService: WeatherServiceProtocol) {
         self.weatherService = weatherService
+        locationManager.delegate = self
+        locationManager.requestLocationAccess()
     }
     
-    func loadWeatherData() {
+    private func loadWeatherData(forCity city: String) {
         let allowedCharacterSet = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
-        let encodedCity:String
+        let encodedCity: String
         if isStringEncoded(city) {
             encodedCity = city
         }
@@ -44,6 +56,19 @@ class WeatherViewModel {
         }
         
         weatherService.getWeatherData(forCity: encodedCity) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let weatherData):
+                self.weatherData = weatherData
+                self.delegate?.weatherViewModelDidUpdateData(self)
+            case .failure(let error):
+                self.delegate?.weatherViewModelDidFailWithError(self, error: error)
+            }
+        }
+    }
+    
+    private func loadWeatherData(forCoordinate coordinate: CLLocationCoordinate2D) {
+        weatherService.getWeatherData(forCoordinate: coordinate) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let weatherData):
@@ -78,5 +103,25 @@ class WeatherViewModel {
     
     private func getLastSearchCity() -> String? {
         return userDefaults.string(forKey: lastSearchCityKey)
+    }
+}
+
+extension WeatherViewModel: LocationManagerDelegate {
+    func locationDidUpdate(location: CLLocation) {
+        weatherService.getWeatherData(forCoordinate: location.coordinate) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let weatherData):
+                self.weatherData = weatherData
+                self.delegate?.weatherViewModelDidUpdateData(self)
+            case .failure(let error):
+                self.delegate?.weatherViewModelDidFailWithError(self, error: error)
+            }
+        }
+    }
+    
+    func locationFailedToUpdate(error: Error) {
+        print("Error getting location: \(error.localizedDescription)")
+        loadLastSearchCity()
     }
 }

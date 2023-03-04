@@ -192,7 +192,6 @@ extension WeatherViewController:UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let unencodedCity = searchController.searchBar.text, !unencodedCity.isEmpty {
             viewModel?.city = unencodedCity
-            viewModel?.loadWeatherData()
             hideDataUI()
         }
     }
